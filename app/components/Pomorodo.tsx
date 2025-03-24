@@ -10,7 +10,7 @@ const chauPhilomeneOne = Chau_Philomene_One({
 });
 
 function Pomodoro() {
-	const focusTime: number = 1 * 60;
+	const focusTime: number = 25 * 60;
 	const breakTime: number = 5 * 60;
 	const [time, setTime] = useState<number>(focusTime);
 	const [isFocus, setIsFocus] = useState<boolean>(true);
