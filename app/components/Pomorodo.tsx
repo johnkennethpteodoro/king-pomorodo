@@ -1,22 +1,27 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Howl } from "howler";
 import { Chau_Philomene_One } from "next/font/google";
-import { Play, Pause, RotateCcw } from "lucide-react";
+import { Play, Pause, RotateCcw, Crown } from "lucide-react";
+
 const chauPhilomeneOne = Chau_Philomene_One({
-	weight: "400", // Chau Philomene One only has a single weight (400)
+	weight: "400",
 	subsets: ["latin"],
 });
 
 function Pomodoro() {
-	const focusTime: number = 25 * 60;
+	const focusTime: number = 1 * 60;
 	const breakTime: number = 5 * 60;
 	const [time, setTime] = useState<number>(focusTime);
 	const [isFocus, setIsFocus] = useState<boolean>(true);
 	const [showReset, isShowReset] = useState<boolean>(false);
 	const [isRunning, setIsRunning] = useState<boolean>(false);
 
-	const sound = new Howl({ src: ["/sounds/lebron.mp3"] });
+	const sound = useRef<Howl | null>(null);
+
+	useEffect(() => {
+		sound.current = new Howl({ src: ["/sounds/lebron.mp3"] });
+	}, []);
 
 	useEffect(() => {
 		let timer: NodeJS.Timeout | null = null;
@@ -26,9 +31,8 @@ function Pomodoro() {
 			timer = setInterval(() => {
 				setTime((prevTime) => prevTime - 1);
 			}, 1000);
-			sound.pause();
 		} else if (time === 0) {
-			sound.play(); // Play sound when timer reaches 0
+			sound.current?.play(); // Play sound when timer reaches 0
 			setIsFocus((prev) => !prev);
 			setTime(isFocus ? breakTime : focusTime);
 		}
@@ -45,10 +49,11 @@ function Pomodoro() {
 	};
 
 	const handleReset = () => {
-		setIsRunning(false); // Stop the timer when resetting
+		setIsRunning(false);
+		setIsFocus(true);
 		isShowReset(false);
-		sound.pause();
-		setTime(isFocus ? focusTime : breakTime); // Reset to the current mode's initial time
+		sound.current?.pause();
+		setTime(focusTime);
 	};
 
 	return (
@@ -59,8 +64,19 @@ function Pomodoro() {
 		>
 			<div className="flex justify-center items-center h-screen text-center">
 				<div>
-					<h1 className="text-2xl">{isFocus ? "Focus Time" : "Break Time"}</h1>
-					<h2 className="text-[130px] tracking-widest">{formatTime(time)}</h2>
+					<div className="relative">
+						<Crown
+							color="orange"
+							size={25}
+							className="absolute left-[106px] -top-[8px] -rotate-45"
+						/>
+						<h1 className="text-[25px] text-center mb-[30px]">King Pomorodo</h1>
+					</div>
+
+					<h1 className={`text-[20px] ${isFocus ? "text-green-500" : "text-red-400"}`}>
+						{isFocus ? "Focus Time" : "Break Time"}
+					</h1>
+					<h2 className="text-[130px] tracking-widest w-[400px]">{formatTime(time)}</h2>
 					<button
 						className={`mt-4 px-6 py-3 ${
 							isFocus ? "bg-black" : "bg-white"
@@ -74,12 +90,12 @@ function Pomodoro() {
 						)}
 					</button>
 					<button
-						className={`mt-4 px-6 py-3 bg-blue-400 text-white rounded-xl cursor-pointer ${
+						className={`mt-4 px-6 py-3 bg-zinc-400 text-white rounded-xl cursor-pointer ${
 							showReset ? "" : "hidden"
 						}`}
 						onClick={handleReset}
 					>
-						<RotateCcw />
+						<RotateCcw size={25} />
 					</button>
 				</div>
 			</div>
